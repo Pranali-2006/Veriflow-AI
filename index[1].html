@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#101A33">
+<title>VeriFlow AI — Intelligent Document Verification &amp; Application Readiness</title>
+
+<!-- ═══════════ SEO ═══════════ -->
+<meta name="description" content="VeriFlow AI checks an application's documents for completeness, quality, name mismatches and duplicates, then scores how close the file is to being submission-ready. Runs fully in the browser — no upload, no server.">
+<meta name="keywords" content="document verification, KYC, application readiness, OCR, fraud detection, hackathon project, vanilla javascript">
+<meta name="author" content="Team ByteForce">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://pranali-2006.github.io/Veriflow-AI/">
+
+<!-- ═══════════ SOCIAL PREVIEW ═══════════ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VeriFlow AI">
+<meta property="og:title" content="VeriFlow AI — Intelligent Document Verification">
+<meta property="og:description" content="Upload an application's documents and get a readiness score, a written explanation of every issue, and a what-if simulator that shows what fixing each one is worth.">
+<meta property="og:url" content="https://pranali-2006.github.io/Veriflow-AI/">
+<meta property="og:image" content="https://pranali-2006.github.io/Veriflow-AI/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VeriFlow AI — Intelligent Document Verification">
+<meta name="twitter:description" content="Document completeness, quality and consistency checking that runs entirely in your browser.">
+<meta name="twitter:image" content="https://pranali-2006.github.io/Veriflow-AI/preview.png">
+
+<!-- ═══════════ ICON ═══════════ -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233B82F6'/%3E%3Cstop offset='1' stop-color='%237C3AED'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M16 6.5 8.5 9.6v5.5c0 4.6 3.2 8.9 7.5 10.4 4.3-1.5 7.5-5.8 7.5-10.4V9.6z' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='m12.8 15.8 2.3 2.3 4.1-4.4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233B82F6'/%3E%3Cstop offset='1' stop-color='%237C3AED'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M16 6.5 8.5 9.6v5.5c0 4.6 3.2 8.9 7.5 10.4 4.3-1.5 7.5-5.8 7.5-10.4V9.6z' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='m12.8 15.8 2.3 2.3 4.1-4.4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to main content</a>
+
+<noscript>
+  <div class="noscript">
+    VeriFlow AI runs entirely in your browser, so JavaScript has to be enabled.
+    Turn it on and reload this page to use the verification engine.
+  </div>
+</noscript>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="side" id="side">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2.5 4.5 5.6v5.5c0 4.6 3.2 8.9 7.5 10.4 4.3-1.5 7.5-5.8 7.5-10.4V5.6z"/>
+        <path d="m8.8 11.8 2.3 2.3 4.1-4.4"/>
+      </svg>
+    </div>
+    <div class="brand-text">VERIFLOW <span>AI</span><em data-i18n="brandSub">Intelligent Verification</em></div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <button class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="11" width="7" height="10" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span data-i18n="navDashboard">Dashboard</span></button>
+    <button class="nav-item" data-page="applications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span data-i18n="navApplications">Applications</span></button>
+    <button class="nav-item" data-page="documents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+      <span data-i18n="navDocuments">Documents</span></button>
+    <button class="nav-item" data-page="verification">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg>
+      <span data-i18n="navVerification">Verification</span></button>
+    <button class="nav-item" data-page="security">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4.5 5.6v5.5c0 4.6 3.2 8.9 7.5 10.4 4.3-1.5 7.5-5.8 7.5-10.4V5.6z"/><path d="m8.8 11.8 2.3 2.3 4.1-4.4"/></svg>
+      <span>Security Center</span></button>
+    <button class="nav-item" data-page="risk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0-9-9"/><path d="m12 12 5-5"/></svg>
+      <span>Risk Analysis</span></button>
+    <button class="nav-item" data-page="issues">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      <span data-i18n="navIssues">Issues</span><b class="nav-count" id="navIssueCount">0</b></button>
+    <button class="nav-item" data-page="reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="5" y="11" width="3.4" height="7" rx="1"/><rect x="10.3" y="6" width="3.4" height="12" rx="1"/><rect x="15.6" y="14" width="3.4" height="4" rx="1"/></svg>
+      <span data-i18n="navReports">Reports</span></button>
+    <button class="nav-item" data-page="audit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/></svg>
+      <span data-i18n="navAudit">Audit Log</span></button>
+    <button class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-3-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.4 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>
+      <span data-i18n="navSettings">Settings</span></button>
+  </nav>
+
+  <div class="side-foot">
+    <div class="engine-chip"><i></i><span data-i18n="engineOnline">AI Engine Online</span></div>
+    <div class="side-meta"><span class="tag-demo" data-i18n="demoMode">Demo Mode</span><span>MVP v1.0</span></div>
+    <div class="side-team" id="sideTeam"></div>
+  </div>
+</aside>
+
+<div class="shell">
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="topbar">
+    <button class="icon-btn burger" id="burger" aria-label="Toggle navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <div class="page-title">
+      <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+      <h1 id="pageTitle">Document Verification Overview</h1>
+      <p id="pageDesc">Monitor application readiness, document quality and verification issues.</p>
+    </div>
+
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="search" placeholder="Search applications, documents, issues" aria-label="Global search" autocomplete="off">
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+
+      <div class="clock"><b id="clockTime">--:--:--</b><span id="clockDate"></span></div>
+
+      <select id="langSel" class="mini-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="hi">हिंदी</option>
+        <option value="mr">मराठी</option>
+      </select>
+
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
+        <b class="dot-count" id="bellCount" hidden>0</b>
+      </button>
+
+      <button class="icon-btn" id="helpBtn" aria-label="Help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2.4-2.4 2.4"/><path d="M12 17h.01"/></svg>
+      </button>
+
+      <button class="icon-btn" id="themeBtn" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+
+      <div class="profile"><div class="avatar">PD</div><div class="who"><b>Admin</b><span>Operations</span></div></div>
+    </div>
+
+    <div class="notif-panel" id="notifPanel" hidden>
+      <div class="notif-head"><b>Notifications</b>
+        <div><button class="link" id="markRead">Mark all read</button><button class="link" id="clearNotif">Clear</button></div>
+      </div>
+      <div id="notifList"></div>
+    </div>
+  </header>
+
+  <main class="main" id="main" tabindex="-1">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <section class="page active" id="page-dashboard">
+
+      <div class="greet">
+        <div>
+          <h2 id="greeting">Good morning, Admin</h2>
+          <p id="greetDate"></p>
+        </div>
+        <div class="greet-actions">
+          <span class="live-chip"><i></i>AI Engine Online<b class="tag-demo" id="modeBadge">DEMO DATA</b></span>
+          <select id="scenarioSel" class="mini-select" title="Demo scenario">
+            <option value="standard" selected>Standard demo — missing + mismatch</option>
+            <option value="perfect">Perfect application</option>
+            <option value="missing">Missing document only</option>
+            <option value="mismatch">Name mismatch</option>
+            <option value="expired">Expired document</option>
+            <option value="quality">Poor quality scan</option>
+            <option value="duplicate">Duplicate document</option>
+            <option value="security">Security warning</option>
+          </select>
+          <button class="btn btn-line" id="loadDemoData">Load scenario</button>
+          <button class="btn btn-primary" id="runFullDemo">▶ Run full AI demo</button>
+        </div>
+      </div>
+
+      <div class="stat-row" id="statRow"></div>
+      <div class="score-strip" id="scoreStrip"></div>
+
+      <div class="grid-2">
+        <!-- 3D AI ENGINE -->
+        <div class="card engine3d">
+          <div class="card-head row">
+            <div><h2>AI Verification Engine</h2><p id="engineSub">Idle — waiting for documents</p></div>
+            <span class="badge b-blue" id="engineBadge">READY</span>
+          </div>
+          <div class="stage3d" id="stage3d">
+            <div class="grid-bg" aria-hidden="true"></div>
+            <div class="scene3d" id="scene3d">
+              <div class="core" id="core">
+                <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+                <span class="scanbeam" id="scanbeam"></span>
+                <div class="core-face">
+                  <b id="coreState">AI ENGINE</b>
+                  <span id="corePct">—</span>
+                  <em id="coreSub">standing by</em>
+                </div>
+              </div>
+              <div id="orbit"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- READINESS -->
+        <div class="card">
+          <div class="card-head"><h2>Application readiness</h2><p id="readyAppSub">No application loaded</p></div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 200 200" class="ring" aria-hidden="true">
+              <circle class="track" cx="100" cy="100" r="76"></circle>
+              <circle class="arc" cx="100" cy="100" r="76" id="dashArc"></circle>
+            </svg>
+            <div class="ring-center"><b id="dashPct">0%</b><span id="dashNote">not started</span></div>
+          </div>
+          <div class="ring-key" id="dashKey"></div>
+          <div class="card-body" style="padding-top:0">
+            <div class="ready-banner" id="readyBanner" hidden>✓ APPLICATION READY</div>
+            <button class="btn btn-primary wide" data-page="verification">View verification</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- AI INSIGHT -->
+        <div class="card insight">
+          <div class="card-head row">
+            <div><h2>AI verification insight</h2><p>Assembled from the current results, not written in advance.</p></div>
+            <span class="badge" id="prioBadge">—</span>
+          </div>
+          <div class="card-body">
+            <p class="insight-text" id="aiInsight">Load an application to see what is holding it back.</p>
+            <div class="insight-act" id="insightAct" hidden>
+              <div><span>Recommended action</span><b id="insightRec"></b></div>
+              <button class="btn btn-primary" id="fixIssues">Fix issues</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCUMENT STATUS -->
+        <div class="card">
+          <div class="card-head"><h2>Document verification status</h2><p>Select any document to open its detail.</p></div>
+          <div class="card-body"><div class="docstat" id="docStatus"></div></div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY CHART -->
+      <div class="card">
+        <div class="card-head row">
+          <div><h2>Verification activity</h2><p>Actions recorded against each day</p></div>
+          <div class="filters" id="rangeFilter">
+            <button class="chip active" data-range="7">7 days</button>
+            <button class="chip" data-range="30">30 days</button>
+            <button class="chip" data-range="90">90 days</button>
+          </div>
+        </div>
+        <div class="card-body"><div class="bars" id="dashChart"></div></div>
+      </div>
+
+      <div class="card engine-live">
+        <div class="card-head row">
+          <div><h2>AI verification engine</h2><p id="lastScanSub">Status and throughput</p></div>
+          <span class="live-chip"><i></i>ONLINE</span>
+        </div>
+        <div class="card-body">
+          <div class="live-grid">
+            <div class="lv"><b id="lvDocs">0</b><span>Documents processed</span></div>
+            <div class="lv"><b id="lvTime">2.4s</b><span>Average processing time</span></div>
+            <div class="lv"><b id="lvAcc">94.8%</b><span>Classification accuracy</span></div>
+            <div class="lv"><b id="lvScan">—</b><span>Last scan</span></div>
+          </div>
+          <div class="stage-strip" id="stageStrip"></div>
+        </div>
+      </div>
+
+      <!-- §15 ACTIONS REQUIRED -->
+      <div class="card actions-req" id="actionsReq" hidden>
+        <div class="card-head row">
+          <div><h2 id="actionsTitle">2 actions required</h2><p>Clear these and the application reaches 100%.</p></div>
+          <button class="btn btn-line" id="fixAll">Fix all</button>
+        </div>
+        <div class="card-body"><div id="actionList"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- ISSUE DISTRIBUTION -->
+        <div class="card">
+          <div class="card-head"><h2>Issue distribution</h2><p>Select a slice to open that filter.</p></div>
+          <div class="card-body dist-wrap">
+            <div class="donut" id="distDonut"><div class="donut-hole"><b id="distTotal">0</b><span>issues</span></div></div>
+            <div class="dist-legend" id="distLegend"></div>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <div class="card">
+          <div class="card-head row"><div><h2>Recent activity</h2><p>Select an entry to jump to it.</p></div>
+            <span class="engine-stat"><b id="procTime">2.4s</b><span>avg processing</span></span></div>
+          <div class="card-body"><div id="recentActivity"></div></div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card">
+        <div class="card-head"><h2 data-i18n="quickActions">Quick actions</h2></div>
+        <div class="card-body qa-row">
+          <button class="qa" data-action="newApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>New application</span></button>
+          <button class="qa" data-action="upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5-5 5 5"/><path d="M12 5v13"/></svg><span data-i18n="upload">Upload documents</span></button>
+          <button class="qa" data-action="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg><span data-i18n="verify">Run verification</span></button>
+          <button class="qa" data-action="issues"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><span>Review issues</span></button>
+          <button class="qa" data-action="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="5" y="11" width="3.4" height="7" rx="1"/><rect x="10.3" y="6" width="3.4" height="12" rx="1"/><rect x="15.6" y="14" width="3.4" height="4" rx="1"/></svg><span>Generate report</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head row"><div><h2>Recent applications</h2><p>Select a row to open its verification detail.</p></div></div>
+        <div class="table-scroll"><table class="tbl" id="recentTable"></table></div>
+      </div>
+    </section>
+
+    <details class="how">
+      <summary><b>How VeriFlow AI works</b><span>Seven stages — what each one actually does</span></summary>
+      <div class="how-body" id="howBody"></div>
+    </details>
+
+    <!-- ══════════ APPLICATIONS ══════════ -->
+    <section class="page" id="page-applications">
+      <div class="split">
+        <div class="card">
+          <div class="card-head row"><div><h2>All applications</h2><p>Stored locally in this browser.</p></div></div>
+          <div class="table-scroll"><table class="tbl" id="appTable"></table></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>New application</h2><p>Every field is validated before the record is created.</p></div>
+          <div class="card-body">
+            <div class="form">
+              <div class="fld"><label for="fName">Applicant name</label><input id="fName" placeholder="Prachi Giri"></div>
+              <div class="fld"><label for="fId">Application ID</label><input id="fId" placeholder="APP-2051"></div>
+              <div class="fld"><label for="fEmail">Email</label><input id="fEmail" type="email" placeholder="name@example.com"></div>
+              <div class="fld"><label for="fPhone">Phone</label><input id="fPhone" placeholder="98XXXXXXXX"></div>
+              <div class="fld"><label for="fType">Application type</label>
+                <select id="fType"><option>Business onboarding</option><option>Individual KYC</option><option>Loan application</option><option>Insurance claim</option></select></div>
+              <div class="fld"><label for="fDate">Date</label><input id="fDate" type="date"></div>
+            </div>
+            <button class="btn btn-primary wide" id="createApp">Create application</button>
+            <div class="form-err" id="formErr" hidden></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DOCUMENTS ══════════ -->
+    <section class="page" id="page-documents">
+      <div class="card">
+        <div class="card-head row">
+          <div><h2 data-i18n="upload">Upload documents</h2><p>Files are read in this tab only. Nothing is sent to a server.</p></div>
+          <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Local demo environment</span>
+        </div>
+        <div class="card-body">
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose files to verify">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5-5 5 5"/><path d="M12 5v13"/></svg>
+            <b>Drag and drop files here</b>
+            <span>or <u>browse files</u> — PDF, JPG, PNG, DOCX up to 10 MB each</span>
+          </div>
+          <div class="drop-row">
+            <label class="drop-lang">Recognition language
+              <select id="ocrLang">
+                <option value="eng">English</option>
+                <option value="eng+hin">English + Hindi</option>
+                <option value="eng+mar">English + Marathi</option>
+              </select>
+            </label>
+            <span class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Local processing — files are never sent to a server</span>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.docx,image/*" multiple hidden>
+          <div id="fileList" class="file-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head row"><div><h2>Document requirements</h2><p>Edit these and the rules follow. Saved to this browser.</p></div>
+          <button class="btn btn-line" id="resetReq">Reset to defaults</button></div>
+        <div class="table-scroll"><table class="tbl" id="reqTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ══════════ VERIFICATION ══════════ -->
+    <section class="page" id="page-verification">
+      <div class="card">
+        <div class="card-head row">
+          <div><h2>Verification pipeline</h2><p>Eight stages. Each one reports as it completes.</p></div>
+          <button class="btn btn-primary" id="runVerify" data-i18n="verify">Run verification</button>
+        </div>
+        <div class="card-body">
+          <div class="prog"><div class="prog-bar"><i id="progBar"></i></div><b id="progPct">0%</b></div>
+          <div class="pipe" id="pipe"></div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><h2 data-i18n="readiness">Application readiness</h2><p id="readySub">No application loaded</p></div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 200 200" class="ring" aria-hidden="true">
+              <circle class="track" cx="100" cy="100" r="76"></circle>
+              <circle class="arc" cx="100" cy="100" r="76" id="ringArc"></circle>
+            </svg>
+            <div class="ring-center"><b id="ringPct">0%</b><span id="ringNote">not started</span></div>
+          </div>
+          <div class="ring-key" id="ringKey"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>What-if simulator</h2><p>See how fixing each issue moves the score, before doing the work.</p></div>
+          <div class="card-body">
+            <div id="whatIfList"></div>
+            <div class="wi-out">
+              <div><span>Current</span><b id="wiNow">0%</b></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+              <div><span>Projected</span><b id="wiNext" class="good">0%</b></div>
+            </div>
+            <button class="btn btn-primary wide" id="applyScenario">Apply scenario</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head row"><div><h2>Verification results</h2><p>Every document, its finding, and the confidence behind it.</p></div>
+          <button class="btn btn-line" id="exportBtn">Export report</button></div>
+        <div class="table-scroll"><table class="tbl" id="resultTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ══════════ ISSUES ══════════ -->
+    <section class="page" id="page-issues">
+      <div class="stat-row" id="issueStats"></div>
+      <div class="card">
+        <div class="card-head row">
+          <div><h2 data-i18n="navIssues">Issues</h2><p>Each one carries a written explanation and a recommended action.</p></div>
+          <div class="filters" id="issueFilters">
+            <button class="chip active" data-f="all">All</button>
+            <button class="chip" data-f="high">High</button>
+            <button class="chip" data-f="medium">Medium</button>
+            <button class="chip" data-f="low">Low</button>
+            <button class="chip" data-f="resolved">Resolved</button>
+          </div>
+        </div>
+        <div class="card-body"><div id="issueList"></div></div>
+      </div>
+    </section>
+
+    <!-- ══════════ SECURITY CENTER ══════════ -->
+    <section class="page" id="page-security">
+      <div class="stat-row" id="secStats"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head row"><div><h2>Security gate</h2><p>Every file passes these checks before anything reads it.</p></div>
+            <button class="btn btn-line" id="privacyBtn">Privacy mode: on</button></div>
+          <div class="card-body"><div id="secChecks"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Document fingerprints</h2><p>Derived from the SHA-256, safe to display and log.</p></div>
+          <div class="card-body"><div id="fingerprints"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Security scan timeline</h2><p>Ordered by the audit log.</p></div>
+        <div class="card-body"><div id="secTimeline"></div></div>
+      </div>
+    </section>
+
+    <!-- ══════════ RISK ANALYSIS ══════════ -->
+    <section class="page" id="page-risk">
+      <div class="split">
+        <div class="card">
+          <div class="card-head row"><div><h2>Risk breakdown</h2><p>Every point on the score traced to the rule that added it.</p></div>
+            <span class="badge b-mute" id="riskBadge">—</span></div>
+          <div class="card-body"><div id="riskBox"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Risk score</h2><p>0 is clean, 100 is blocked</p></div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 200 200" class="ring" aria-hidden="true">
+              <circle class="track" cx="100" cy="100" r="76"></circle>
+              <circle class="arc" cx="100" cy="100" r="76" id="riskArc"></circle>
+            </svg>
+            <div class="ring-center"><b id="riskPct">0</b><span id="riskLvl">no risk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Cross-document consistency</h2><p id="consSub">Compares the same field across every document instead of checking each one alone.</p></div>
+        <div class="card-body"><div id="consBox"></div></div>
+      </div>
+    </section>
+
+    <!-- ══════════ REPORTS ══════════ -->
+    <section class="page" id="page-reports">
+      <div class="stat-row" id="reportStats"></div>
+      <div class="split">
+        <div class="card"><div class="card-head"><h2>Weekly applications</h2><p>Volume received each day</p></div>
+          <div class="card-body"><div class="bars" id="chartWeek"></div></div></div>
+        <div class="card"><div class="card-head"><h2>Document status</h2><p>Across every verified document</p></div>
+          <div class="card-body"><div class="hbars" id="chartStatus"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head row"><div><h2>Issue distribution</h2><p>Which checks are failing most often</p></div>
+          <div class="btn-row"><button class="btn btn-line" id="printBtn">Print report</button><button class="btn btn-primary" id="exportBtn2">Export CSV</button></div></div>
+        <div class="card-body"><div class="hbars" id="chartIssues"></div></div>
+      </div>
+    </section>
+
+    <!-- ══════════ AUDIT ══════════ -->
+    <section class="page" id="page-audit">
+      <div class="card">
+        <div class="card-head row"><div><h2 data-i18n="navAudit">Audit log</h2><p>Every action taken in this session, kept in this browser.</p></div>
+          <button class="btn btn-line" id="clearAudit">Clear log</button></div>
+        <div class="table-scroll"><table class="tbl" id="auditTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ══════════ SETTINGS ══════════ -->
+    <section class="page" id="page-settings">
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><h2>Verification thresholds</h2><p>The rule engine reads these values directly.</p></div>
+          <div class="card-body">
+            <div class="fld"><label for="setQuality">Minimum quality score (%)</label><input id="setQuality" type="number" min="0" max="100" value="60"></div>
+            <div class="fld"><label for="setName">Minimum name similarity (%)</label><input id="setName" type="number" min="0" max="100" value="90"></div>
+            <div class="fld"><label for="setAge">Address proof validity (months)</label><input id="setAge" type="number" min="1" max="24" value="3"></div>
+            <button class="btn btn-primary wide" id="saveSettings">Save settings</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Data</h2><p>Everything lives in this browser's local storage.</p></div>
+          <div class="card-body">
+            <p class="muted">Applications, documents, issues, audit entries, language and theme are all stored on this device. No document content is kept — only its filename, size and the verification outcome.</p>
+            <div class="btn-row"><button class="btn btn-line" id="resetAll">Reset everything</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ FOOTER ══════════ -->
+    <footer class="foot">
+      <div>
+        <h3>About this project</h3>
+        <p>VeriFlow AI was built for HACK-VERSE 2026, Problem Statement 1 — an AI-powered document
+           verification and completeness checker. Everything runs in the browser: files are read
+           locally, nothing is uploaded, and no key or server is needed.</p>
+        <div class="foot-links">
+          <a href="REPO_URL" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.4 5 18.4 5.3 18.4 5.3c.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+            Source code
+          </a>
+          <a href="LIVE_URL" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg>
+            Live demo
+          </a>
+        </div>
+      </div>
+      <div>
+        <h3>Team ByteForce</h3>
+        <div class="team-grid" id="teamGrid"></div>
+      </div>
+      <div class="foot-legal">
+        <span id="footCopy">&copy; 2026 Team ByteForce · MIT Licensed</span>
+        <span>Built for HACK-VERSE 2026 · Problem Statement 1 · v1.0.0</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- ══════════ MODAL ══════════ -->
+<div class="modal-back" id="modalBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head"><h3 id="modalTitle">Document</h3>
+      <button class="icon-btn" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
